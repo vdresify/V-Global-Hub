@@ -3,144 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V-Global Hub | Premium Global Store</title>
+    <title>V-Global Hub | Premium Experience</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
     <style>
         :root { --gold: #D4AF37; --black: #000; --card: #111; --white: #fff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: var(--black); color: var(--white); }
+        body { background: var(--black); color: var(--white); text-align: center; }
 
-        /* Navigation & Social Sidebar */
-        nav { background: #000; padding: 20px; text-align: center; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 1000; }
-        .logo { font-size: 26px; font-weight: 800; color: var(--gold); letter-spacing: 4px; }
+        /* Navbar */
+        nav { background: #000; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: 2px; }
+        .wallet-nav { background: #111; padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold); font-size: 13px; }
+
+        /* UI Containers */
+        .container { max-width: 500px; margin: auto; padding: 20px; }
+        .card { background: #080808; padding: 30px; border-radius: 25px; border: 1px solid #222; margin-top: 30px; }
         
-        .social-sidebar { position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 1001; display: flex; flex-direction: column; }
-        .social-icon { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 14px; margin-bottom: 2px; border-radius: 0 5px 5px 0; font-weight: bold; }
-        .wa { background: #25D366; } .ig { background: #E1306C; }
+        /* Buttons */
+        .btn-gold { background: linear-gradient(145deg, #D4AF37, #8A6D3B); color: #000; padding: 15px; border: none; border-radius: 15px; width: 100%; font-weight: 800; cursor: pointer; margin-top: 15px; text-transform: uppercase; }
+        .btn-google { background: white; color: black; margin-bottom: 10px; }
+        
+        /* Dashboard Items */
+        .menu-item { background: #0d0d0d; border: 1px solid #222; padding: 18px; border-radius: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .menu-text { font-size: 13px; font-weight: 700; color: var(--gold); }
+        .strike-badge { color: #ff4444; font-size: 10px; font-weight: bold; margin-top: 5px; display: block; }
 
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
-
-        /* User Counter */
-        .user-panel { background: #080808; padding: 15px; border-radius: 15px; border: 1px solid #222; margin-bottom: 30px; display: flex; justify-content: space-around; text-align: center; }
-        .stat h3 { color: var(--gold); font-size: 20px; }
-        .stat p { font-size: 9px; color: #666; text-transform: uppercase; }
-
-        /* Full YouTuber Promotion Grid */
-        .promo-section { margin-bottom: 40px; }
-        .promo-title { color: var(--gold); font-size: 12px; letter-spacing: 3px; text-align: center; margin-bottom: 20px; text-transform: uppercase; }
-        .ad-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .ad-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 12px; text-align: center; }
-        .ad-card.main { border: 2px solid var(--gold); }
-        .yt-name { color: var(--gold); font-weight: 700; display: block; margin-bottom: 10px; }
-        .btn-yt { background: #ff0000; color: #fff; padding: 6px 15px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 700; }
-
-        /* 15 Product Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .product { background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #222; transition: 0.4s; }
-        .product:hover { border-color: var(--gold); transform: translateY(-10px); }
-        .product img { width: 100%; height: 280px; object-fit: cover; }
-        .details { padding: 20px; }
-        .details h3 { font-size: 18px; margin-bottom: 8px; }
-        .desc { font-size: 12px; color: #888; margin-bottom: 15px; height: 40px; overflow: hidden; }
-        .price { font-size: 22px; font-weight: 700; color: var(--gold); display: block; margin-bottom: 15px; }
-
-        /* Rating System */
-        .rating { color: #333; font-size: 20px; cursor: pointer; margin-bottom: 15px; }
-        .rating span.active { color: var(--gold); }
-
-        .btn-buy { display: block; width: 100%; padding: 15px; background: var(--gold); color: #000; text-align: center; text-decoration: none; font-weight: 800; border-radius: 10px; text-transform: uppercase; }
-
-        footer { padding: 50px; text-align: center; border-top: 2px solid #111; margin-top: 50px; background: #050505; }
+        .hidden { display: none; }
+        input, textarea { background: #111; border: 1px solid #333; color: white; padding: 12px; border-radius: 10px; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="social-sidebar">
-        <a href="https://wa.me/918808722351" class="social-icon wa">WA</a>
-        <a href="https://www.instagram.com/vin_ayak703" class="social-icon ig">IG</a>
-    </div>
-
-    <nav><div class="logo">V-GLOBAL HUB</div></nav>
+    <nav>
+        <div class="logo">V-GLOBAL</div>
+        <div class="wallet-nav">🪙 <span id="nav-coins">0</span> V-Coins</div>
+    </nav>
 
     <div class="container">
         
-        <div class="user-panel">
-            <div class="stat"><h3 id="count">15,482</h3><p>Live Visitors</p></div>
-            <div class="stat"><h3>5,200+</h3><p>Verified Users</p></div>
-            <div class="stat"><h3>100%</h3><p>Secure Hub</p></div>
+        <div id="login-screen" class="card">
+            <h2 style="color:var(--gold); font-style:italic; margin-bottom:20px;">ACCESS V-GLOBAL</h2>
+            <button onclick="loginWithGoogle()" class="btn-gold btn-google">LOGIN WITH GOOGLE</button>
+            <p style="color:#444; font-size:12px;">Premium Secure Access</p>
         </div>
 
-        <div class="promo-section">
-            <p class="promo-title">Featured Promotion Partners</p>
-            <div class="ad-grid">
-                <div class="ad-card main">
-                    <span class="yt-name">Anti Hacker Ranjeet</span>
-                    <a href="https://youtube.com/@antihackeranjeet?si=u88E9xPNkomZ-ho_" class="btn-yt" target="_blank">SUBSCRIBE</a>
-                </div>
-                <div class="ad-card">
-                    <span class="yt-name">Technical Guruji</span>
-                    <a href="#" class="btn-yt">PROMOTED</a>
-                </div>
-                <div class="ad-card">
-                    <span class="yt-name">Flying Beast</span>
-                    <a href="#" class="btn-yt">PROMOTED</a>
-                </div>
-                <div class="ad-card">
-                    <span class="yt-name">ABP News</span>
-                    <a href="#" class="btn-yt">FEATURED</a>
+        <div id="dashboard-screen" class="hidden">
+            <div style="display:flex; align-items:center; margin-bottom:25px; text-align:left;">
+                <img id="user-img" src="" style="width:60px; height:60px; border-radius:50%; border:2px solid var(--gold); margin-right:15px;">
+                <div>
+                    <p style="font-size:12px; color:#888;">WELCOME,</p>
+                    <h2 id="display-name" style="color:var(--gold); font-style:italic;">Mr. Guest</h2>
+                    <span id="user-id-tag" style="color:var(--gold); font-weight:bold; font-size:12px;">ID: --</span>
+                    <span id="strike-info" class="strike-badge"></span>
                 </div>
             </div>
+
+            <div class="menu-item" onclick="openForm('Seller')">
+                <span class="menu-text">💼 SELLER DASHBOARD</span>
+                <span>▶</span>
+            </div>
+            <div class="menu-item" onclick="openForm('Model')">
+                <span class="menu-text">📸 MODEL CASTING HUB</span>
+                <span>▶</span>
+            </div>
+            <div class="menu-item" onclick="alert('Referral Code: ' + currentUID)">
+                <span class="menu-text">🔗 REFER & EARN</span>
+                <span>▶</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-text">🚀 YOUTUBERS PROMOTION</span>
+                <span>▶</span>
+            </div>
+
+            <button onclick="logout()" style="background:none; border:none; color:red; font-size:11px; margin-top:20px; cursor:pointer;">LOGOUT ACCOUNT</button>
         </div>
 
-        <div class="grid" id="product-list">
-            </div>
-
+        <div id="form-section" class="card hidden">
+            <h3 id="form-title" style="color:var(--gold); margin-bottom:15px;">SUBMIT DETAILS</h3>
+            <input type="text" id="form-subject" placeholder="Title/Name">
+            <textarea id="form-desc" rows="4" placeholder="Description (Be careful with words...)"></textarea>
+            <button onclick="submitData()" class="btn-gold">SUBMIT FOR AUTO-APPROVAL</button>
+            <button onclick="closeForm()" style="background:none; border:none; color:#666; margin-top:10px;">Cancel</button>
+        </div>
     </div>
 
-    <footer>
-        <p style="color:var(--gold); margin-bottom:10px; font-size:16px; font-weight:700;">V-GLOBAL HUB OFFICIAL</p>
-        <p style="color:#444; font-size:11px;">&copy; 2026 Vinayak Jay Parkash Tiwari | Premium Quality Brand</p>
-    </footer>
-
     <script>
-        // Full Product Data (15 Items)
-        const products = [
-            { name: "Executive Smart Watch", price: "₹2,499", desc: "Premium calling & health tracking features.", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500" },
-            { name: "JBL Pure Bass Earphones", price: "₹1,299", desc: "Deep bass, noise cancellation, official JBL sound.", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" },
-            { name: "Premium Cotton Shirt", price: "₹899", desc: "100% Cotton, slim-fit luxury formal wear.", img: "https://images.unsplash.com/photo-1596755094514-f87034a264c6?w=500" },
-            { name: "Slim Fit Chinos Pant", price: "₹1,199", desc: "Stretchable fabric for professional comfort.", img: "https://images.unsplash.com/photo-1624371414361-e6e8ea0c3535?w=500" },
-            { name: "Sporty Running Shoes", price: "₹1,999", desc: "Ultra-lightweight sole for athletic performance.", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" },
-            { name: "Couple Ethnic Set", price: "₹4,499", desc: "Matching designer wear for royal couples.", img: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=500" },
-            { name: "Gold Plated Royal Ring", price: "₹599", desc: "Pure 24K plating with classic premium finish.", img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500" },
-            { name: "Urban White Sneakers", price: "₹1,499", desc: "Minimalist design for the modern street style.", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500" },
-            { name: "Oversized Graphic Tee", price: "₹699", desc: "Heavy fabric cotton with viral print designs.", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500" },
-            { name: "Luxury Couple Watch Set", price: "₹3,999", desc: "Twin watches designed for lasting relationships.", img: "https://images.unsplash.com/photo-1508685096489-7aac291ba597?w=500" },
-            { name: "Denim Rugged Jacket", price: "₹1,799", desc: "High-grade denim for the tough winter look.", img: "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=500" },
-            { name: "Smart Bluetooth Speaker", price: "₹2,199", desc: "360-degree sound with RGB light effects.", img: "https://images.unsplash.com/photo-1608156639585-3400c58e0c9c?w=500" },
-            { name: "Leather Formal Belt", price: "₹499", desc: "Genuine leather with auto-lock gold buckle.", img: "https://images.unsplash.com/photo-1624222247344-550fb8ee97ed?w=500" },
-            { name: "Couple Hoodies (Set of 2)", price: "₹2,299", desc: "Soft fleece fabric with 'King & Queen' print.", img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500" },
-            { name: "Signature Mens Perfume", price: "₹799", desc: "Long-lasting musk fragrance for men.", img: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500" }
-        ];
+        // --- 1. FIREBASE CONFIGURATION (INVOLVED) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAS_hCWbLbNfcZJ8CJOzR5OOHEhA1xcjJU",
+            authDomain: "v-global-eff1e.firebaseapp.com",
+            projectId: "v-global-eff1e",
+            storageBucket: "v-global-eff1e.firebasestorage.app",
+            messagingSenderId: "686810708424",
+            appId: "1:686810708424:web:cef8d92f19a0e36ca168fd"
+        };
 
-        const container = document.getElementById('product-list');
-        products.forEach(p => {
-            container.innerHTML += `
-                <div class="product">
-                    <img src="${p.img}" alt="${p.name}">
-                    <div class="details">
-                        <div class="rating"><span onclick="this.classList.add('active')">★ ★ ★ ★ ★</span></div>
-                        <h3>${p.name}</h3>
-                        <p class="desc">${p.desc}</p>
-                        <span class="price">${p.price}</span>
-                        <a href="https://wa.me/918808722351?text=Order: ${p.name}" class="btn-buy">Buy Now</a>
-                    </div>
-                </div>
-            `;
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUID = "";
+        let currentFormType = "";
+        const badWords = ["badword1", "badword2"]; // Add your list here
+
+        // --- 2. AUTH FUNCTIONS ---
+        async function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                const userRef = db.collection('users').doc(user.uid);
+                const doc = await userRef.get();
+                
+                if (!doc.exists) {
+                    const snap = await db.collection('users').get();
+                    const newId = `ID: ${(snap.size + 1).toString().padStart(2, '0')}`;
+                    await userRef.set({
+                        uniqueId: newId, name: user.displayName, email: user.email,
+                        vCoins: 50, strikes: 0, status: "Active"
+                    });
+                }
+            } catch (error) { alert(error.message); }
+        }
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const doc = await db.collection('users').doc(user.uid).get();
+                const data = doc.data();
+                
+                if (data.status === "Banned") {
+                    document.body.innerHTML = `<h1 style="margin-top:100px; color:gold;">🚫 BANNED<br><span style="font-size:14px; color:white;">Penalty needed to unban.</span></h1>`;
+                    return;
+                }
+
+                currentUID = data.uniqueId;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+                document.getElementById('display-name').innerText = data.name;
+                document.getElementById('user-id-tag').innerText = data.uniqueId;
+                document.getElementById('nav-coins').innerText = data.vCoins;
+                document.getElementById('user-img').src = user.photoURL;
+                document.getElementById('strike-info').innerText = data.strikes > 0 ? `Warnings: ${data.strikes}/3` : "";
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('dashboard-screen').classList.add('hidden');
+            }
         });
 
-        // Visitor Counter
-        let c = 15482;
-        setInterval(() => { c += Math.floor(Math.random() * 3); document.getElementById('count').innerText = c.toLocaleString(); }, 2000);
+        // --- 3. LOGIC & STRIKE SYSTEM ---
+        function openForm(type) {
+            currentFormType = type;
+            document.getElementById('form-title').innerText = type + " Registration";
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('form-section').classList.remove('hidden');
+        }
+
+        function closeForm() {
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+        }
+
+        async function submitData() {
+            const desc = document.getElementById('form-desc').value;
+            const user = auth.currentUser;
+            
+            // Abusive Language Check
+            let isAbusive = badWords.some(word => desc.toLowerCase().includes(word));
+            if (isAbusive) {
+                const userRef = db.collection('users').doc(user.uid);
+                const doc = await userRef.get();
+                let strikes = (doc.data().strikes || 0) + 1;
+                
+                if (strikes >= 4) {
+                    await userRef.update({ status: "Banned", strikes: strikes });
+                    location.reload();
+                } else {
+                    await userRef.update({ strikes: strikes });
+                    alert(`Strike ${strikes}/3! Abusive language not allowed.`);
+                }
+                return;
+            }
+
+            // Save Data
+            await db.collection('submissions').add({
+                userId: currentUID,
+                type: currentFormType,
+                content: desc,
+                status: "Approved", // Auto-approved as requested
+                time: new Date()
+            });
+            alert("Success! Your " + currentFormType + " profile is live.");
+            closeForm();
+        }
+
+        function logout() { auth.signOut(); }
     </script>
 </body>
 </html>
