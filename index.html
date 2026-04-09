@@ -3,80 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>V-Pro Global | Final Fix</title>
+    <title>V-Pro Global | Supreme Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <style>
-        :root { --gold: #D4AF37; --black: #000; --card: #111; }
-        body { background: #000; color: #fff; margin: 0; font-family: 'Poppins', sans-serif; }
-        
-        /* Zabar-dasti dikhane wala system */
-        #main-wrapper { display: block !important; min-height: 100vh; }
+        :root { 
+            --gold: #D4AF37; 
+            --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #F1D279 50%, #B49235 100%);
+            --black: #000000;
+            --card-bg: #121212;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--black); color: #fff; overflow-x: hidden; }
         .hidden { display: none !important; }
 
-        .top-bar { background: var(--gold); color: #000; padding: 12px; text-align: center; font-weight: 900; font-size: 11px; }
-        
-        #screen-auth { padding: 80px 20px; text-align: center; }
-        .card { background: var(--card); border: 1px solid #222; padding: 25px; border-radius: 20px; margin: auto; max-width: 350px; }
-        .btn-gold { width: 100%; padding: 16px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; margin-top: 20px; }
+        /* PREMIUM AURA ANIMATION */
+        .founder-aura { border: 2.5px solid transparent !important; background-image: linear-gradient(var(--card-bg), var(--card-bg)), var(--gold-gradient); background-origin: border-box; background-clip: content-box, border-box; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); animation: aura-pulse 3s infinite linear; }
+        @keyframes aura-pulse { 0% { filter: hue-rotate(0deg); box-shadow: 0 0 10px rgba(212, 175, 55, 0.4); } 50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.7); } 100% { filter: hue-rotate(5deg); box-shadow: 0 0 10px rgba(212, 175, 55, 0.4); } }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #050505; display: flex; padding: 15px 0; border-top: 1px solid #222; }
-        .nav-item { flex: 1; text-align: center; color: #444; font-size: 20px; }
-        .nav-item.active { color: var(--gold); }
-        .app-page { padding: 20px 15px 100px 15px; }
+        /* LAYOUT */
+        .top-nav { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid #222; position: sticky; top: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; }
+        .brand { font-weight: 900; font-size: 18px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; }
+
+        .container { padding: 20px; padding-bottom: 100px; }
+        .card { background: var(--card-bg); border: 1px solid #222; border-radius: 24px; padding: 20px; margin-bottom: 20px; transition: 0.3s; }
+        .card:active { transform: scale(0.98); }
+
+        /* BUTTONS */
+        .btn-gold { background: var(--gold-gradient); color: #000; border: none; padding: 14px 20px; border-radius: 14px; font-weight: 700; font-size: 13px; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); width: 100%; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #888; padding: 12px; border-radius: 12px; font-size: 12px; }
+
+        /* REWARDS GRID */
+        .grid-7 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
+        .day-item { background: #080808; border: 1px solid #222; border-radius: 12px; padding: 12px 5px; text-align: center; font-size: 10px; color: #555; }
+        .day-item.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.05); }
+        .day-item.claimed { background: var(--gold-gradient); color: #000; font-weight: bold; border: none; }
+
+        /* BOTTOM NAV */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: rgba(0,0,0,0.95); display: flex; border-top: 1px solid #1a1a1a; padding-bottom: 15px; z-index: 1000; }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #444; transition: 0.3s; }
+        .nav-link i { font-size: 20px; margin-bottom: 4px; }
+        .nav-link span { font-size: 9px; font-weight: 600; letter-spacing: 1px; }
+        .nav-link.active { color: var(--gold); }
+
+        /* PANELS */
+        .admin-section { border-left: 4px solid var(--gold); padding-left: 15px; margin-top: 20px; }
+        input { width: 100%; background: #000; border: 1px solid #333; padding: 12px; border-radius: 10px; color: #fff; margin: 10px 0; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div id="main-wrapper">
-        <div class="top-bar">V-PRO GLOBAL ACTIVE</div>
+    <div id="auth-screen" class="hidden">
+        <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;">
+            <div class="card" style="text-align: center;">
+                <h1 class="brand">V-PRO GLOBAL</h1>
+                <p style="color: #666; font-size: 12px; margin: 10px 0 30px;">Professional Multi-Service Gateway</p>
+                <button class="btn-gold" onclick="supreme.login()">Sign In with Google</button>
+            </div>
+        </div>
+    </div>
 
-        <div id="screen-auth">
-            <div class="card">
-                <h1 style="color:var(--gold); margin:0;">V-PRO</h1>
-                <p style="font-size:10px; color:#666;">SUPREME MULTI-SERVICE PLATFORM</p>
-                <button class="btn-gold" onclick="vCore.login()">Google Sign In</button>
-                <p id="status-msg" style="font-size:9px; margin-top:15px; color:var(--gold);">Waiting for Connection...</p>
+    <div id="main-app" class="hidden">
+        <div class="top-nav">
+            <div class="brand" onclick="supreme.secret()">V-PRO GLOBAL</div>
+            <div style="display: flex; gap: 15px;">
+                <i class="fas fa-bell" style="color: #444;"></i>
+                <i class="fas fa-qrcode" style="color: var(--gold);"></i>
             </div>
         </div>
 
-        <div id="app-main" class="hidden">
-            <section id="page-home" class="app-page">
-                <div class="card" style="text-align:center;">
-                    <h4 style="color:var(--gold)">HOME DASHBOARD</h4>
-                    <p id="timer-txt" style="font-size:10px;">Session: 0s</p>
+        <div class="container">
+            <section id="page-home" class="page">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div><p style="color: #666; font-size: 11px;">Active Session</p><h4 id="timer-box">00:00:00</h4></div>
+                        <i class="fas fa-bolt" style="color: var(--gold); font-size: 24px;"></i>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 10px;">Marketplace</h3>
+                    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                        <div style="min-width: 120px; height: 120px; background: #1a1a1a; border-radius: 15px;"></div>
+                        <div style="min-width: 120px; height: 120px; background: #1a1a1a; border-radius: 15px;"></div>
+                    </div>
                 </div>
             </section>
 
-            <section id="page-wallet" class="app-page hidden">
-                <div class="card" style="text-align:center;">
-                    <h2 id="u-coins" style="color:var(--gold)">0</h2>
-                    <p style="font-size:10px;">V-COINS</p>
+            <section id="page-wallet" class="page hidden">
+                <div class="card" style="text-align: center; padding: 40px 20px; background: linear-gradient(180deg, #181818 0%, #000 100%);">
+                    <p style="font-size: 12px; color: #888; letter-spacing: 2px;">V-COINS BALANCE</p>
+                    <h1 id="v-balance" style="font-size: 48px; font-weight: 900; margin: 10px 0; color: var(--gold);">0</h1>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn-gold" style="padding: 10px;">Transfer</button>
+                        <button class="btn-outline" style="width: 100%;">History</button>
+                    </div>
                 </div>
             </section>
 
-            <section id="page-me" class="app-page hidden" style="text-align:center;">
-                <img id="u-img" src="" style="width:100px; height:100px; border-radius:50%; border:2px solid var(--gold);">
-                <h2 id="u-name">---</h2>
-                <div id="signin-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:15px;"></div>
+            <section id="page-me" class="page hidden">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="position: relative; display: inline-block;">
+                        <img id="p-img" src="" class="founder-aura" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover;">
+                        <div style="position: absolute; bottom: 5px; right: 5px; background: var(--gold); color: #000; width: 25px; height: 25px; border-radius: 50%; font-size: 12px; display: flex; align-items: center; justify-content: center; border: 3px solid #000;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <h2 id="p-name" style="margin-top: 15px; font-weight: 800;">---</h2>
+                    <p id="p-id" style="color: #666; font-size: 11px; font-weight: bold;"></p>
+                </div>
+
+                <div class="card">
+                    <h4 style="color: var(--gold); font-size: 13px;"><i class="fas fa-calendar-check" style="margin-right: 8px;"></i> STREAK REWARDS</h4>
+                    <div class="grid-7" id="reward-grid"></div>
+                    <button id="claim-btn" class="btn-gold hidden" onclick="supreme.claim()">Claim Daily Coins</button>
+                </div>
+            </section>
+
+            <section id="page-admin" class="page hidden">
+                <div class="card">
+                    <h2 style="color: var(--gold);">GOD CONTROL</h2>
+                    <p style="font-size: 10px; color: #555;">SYSTEM LEVEL ACCESS</p>
+                    <div class="admin-section">
+                        <input type="text" id="target-vpg" placeholder="Enter User VPG-ID">
+                        <button class="btn-gold" onclick="supreme.ban(true)">Ban Account</button>
+                        <button class="btn-outline" style="width: 100%; margin-top: 10px;" onclick="supreme.ban(false)">Unban Account</button>
+                    </div>
+                </div>
             </section>
         </div>
-
-        <nav id="nav-bar" class="bottom-nav hidden">
-            <div class="nav-item active" onclick="vCore.switch('home', this)"><i class="fas fa-home"></i></div>
-            <div class="nav-item" onclick="vCore.switch('wallet', this)"><i class="fas fa-wallet"></i></div>
-            <div class="nav-item" onclick="vCore.switch('me', this)"><i class="fas fa-user-circle"></i></div>
-        </nav>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <nav class="nav-bar hidden" id="nav-bar">
+        <div class="nav-link active" onclick="supreme.tab('home', this)"><i class="fas fa-home"></i><span>HOME</span></div>
+        <div class="nav-link" onclick="supreme.tab('wallet', this)"><i class="fas fa-wallet"></i><span>WALLET</span></div>
+        <div class="nav-link" onclick="supreme.tab('me', this)"><i class="fas fa-user"></i><span>PROFILE</span></div>
+    </nav>
 
     <script>
-        const firebaseConfig = { 
+        const config = {
             apiKey: "AIzaSyB4Wk-096y9SAhtygKGLoJ1EHZR0WWSUOc",
             authDomain: "v-pro-global.firebaseapp.com",
             projectId: "v-pro-global",
@@ -84,39 +156,93 @@
             messagingSenderId: "741845554827",
             appId: "1:741845554827:web:04a75d2207df326d72a68e"
         };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        firebase.initializeApp(config);
+        const auth = firebase.auth(), db = firebase.firestore();
 
-        const vCore = {
+        const supreme = {
+            user: null,
+            timer: 0,
+            taps: 0,
+
             login: () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
-            switch: (id, el) => {
-                document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            
+            init: function(data) {
+                this.user = data;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('nav-bar').classList.remove('hidden');
+
+                document.getElementById('p-name').innerText = data.name;
+                document.getElementById('p-id').innerText = "VPG-" + data.uniqueId;
+                document.getElementById('v-balance').innerText = data.vCoins || 0;
+                document.getElementById('p-img').src = auth.currentUser.photoURL;
+
+                if(auth.currentUser.email === "dreamchat26@gmail.com") {
+                    document.getElementById('p-img').classList.add('founder-aura');
+                }
+                
+                this.startTimer();
+                this.renderRewards();
+            },
+
+            tab: function(id, el) {
+                document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
                 document.getElementById('page-'+id).classList.remove('hidden');
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
                 el.classList.add('active');
+            },
+
+            startTimer: function() {
+                setInterval(() => {
+                    this.timer++;
+                    let h = Math.floor(this.timer/3600).toString().padStart(2,'0');
+                    let m = Math.floor((this.timer%3600)/60).toString().padStart(2,'0');
+                    let s = (this.timer%60).toString().padStart(2,'0');
+                    document.getElementById('timer-box').innerText = `${h}:${m}:${s}`;
+                    if(this.timer % 600 === 0) db.collection('users').doc(auth.currentUser.uid).update({ vCoins: firebase.firestore.FieldValue.increment(70) });
+                }, 1000);
+            },
+
+            renderRewards: function() {
+                const grid = document.getElementById('reward-grid'); grid.innerHTML = "";
+                for(let i=1; i<=8; i++) {
+                    const d = document.createElement('div');
+                    d.className = `day-item ${this.user.streak >= i ? 'claimed' : (this.user.streak + 1 === i ? 'active' : '')}`;
+                    d.innerText = "DAY " + i;
+                    grid.appendChild(d);
+                }
+                if(this.user.lastClaimed !== new Date().toDateString()) document.getElementById('claim-btn').classList.remove('hidden');
+            },
+
+            claim: async function() {
+                await db.collection('users').doc(auth.currentUser.uid).update({ vCoins: firebase.firestore.FieldValue.increment(50), streak: (this.user.streak||0)+1, lastClaimed: new Date().toDateString() });
+                location.reload();
+            },
+
+            ban: async (val) => {
+                const id = document.getElementById('target-vpg').value.replace('VPG-','');
+                const snap = await db.collection('users').where('uniqueId', '==', parseInt(id)).get();
+                if(!snap.empty) { await snap.docs[0].ref.update({ isBanned: val }); alert("Status Updated!"); }
+            },
+
+            secret: function() {
+                this.taps++; if(this.taps >= 7 && auth.currentUser.email === "dreamchat26@gmail.com") this.tab('admin', {classList:{add:()=>{},remove:()=>{}}});
             }
         };
 
         auth.onAuthStateChanged(async user => {
-            const status = document.getElementById('status-msg');
             if(user) {
-                status.innerText = "Authenticating User...";
                 const doc = await db.collection('users').doc(user.uid).get();
                 if(doc.exists) {
-                    document.getElementById('screen-auth').classList.add('hidden');
-                    document.getElementById('app-main').classList.remove('hidden');
-                    document.getElementById('nav-bar').classList.remove('hidden');
-                    document.getElementById('u-name').innerText = doc.data().name;
-                    document.getElementById('u-img').src = doc.data().profilePic || user.photoURL;
-                    document.getElementById('u-coins').innerText = doc.data().vCoins || 0;
+                    if(doc.data().isBanned) { document.body.innerHTML = "<h1 style='color:red;text-align:center;padding:50px;'>ACCOUNT BANNED</h1>"; return; }
+                    supreme.init(doc.data());
                 } else {
-                    await db.collection('users').doc(user.uid).set({ name: user.displayName, vCoins: 100, streak: 0, uniqueId: Math.floor(1000+Math.random()*9000) });
+                    const vid = Math.floor(1000 + Math.random()*9000);
+                    await db.collection('users').doc(user.uid).set({ name: user.displayName, uniqueId: vid, vCoins: 100, streak: 0, lastClaimed: "", isBanned: false });
                     location.reload();
                 }
             } else {
-                status.innerText = "Ready to Login ✅";
+                document.getElementById('auth-screen').classList.remove('hidden');
             }
         });
     </script>
