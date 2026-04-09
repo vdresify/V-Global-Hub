@@ -1,60 +1,230 @@
-<div class="side-menu" id="side-menu">
-        <h3 style="color:var(--gold); margin-bottom: 20px;">V-PRO SERVICES</h3>
-        
-        <div id="god-opt" class="menu-item hidden" onclick="core.switch('god')">
-            <i class="fas fa-crown"></i> Master Control (God)
-        </div>
-        
-        <div id="mgr-opt" class="menu-item hidden" onclick="core.switch('god')">
-            <i class="fas fa-tasks"></i> Manager Panel
-        </div>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V-Pro Global | Supreme V8</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
+    <style>
+        :root { --gold: #D4AF37; --black: #000; --card: #0d0d0d; --rainbow: linear-gradient(45deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--black); color: #fff; overflow-x: hidden; }
+        .hidden { display: none !important; }
+
+        /* KING'S AURA */
+        .founder-aura { border: 3px solid var(--gold) !important; box-shadow: 0 0 20px var(--gold); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 5px var(--gold); } 50% { box-shadow: 0 0 25px var(--gold); } 100% { box-shadow: 0 0 5px var(--gold); } }
+
+        .app-page { padding-top: 20px; padding-bottom: 100px; min-height: 100vh; }
+        .card { background: var(--card); border: 1px solid #1a1a1a; padding: 15px; border-radius: 20px; margin: 12px; }
+        .btn-gold { width: 100%; padding: 14px; background: var(--gold); color: #000; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+        .god-input { width: 100%; padding: 12px; margin: 8px 0; background: #080808; border: 1px solid #222; color: #fff; border-radius: 12px; font-size: 13px; outline: none; }
+
+        /* DAILY GRID */
+        .signin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+        .day-box { background: #111; padding: 8px; border-radius: 10px; text-align: center; font-size: 9px; border: 1px solid #222; }
+        .day-box.claimed { background: var(--gold); color: #000; font-weight: bold; }
+
+        /* NAVIGATION & MENU */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(0,0,0,0.95); display: flex; padding: 12px 0; border-top: 1px solid #1a1a1a; z-index: 4000; backdrop-filter: blur(15px); }
+        .nav-item { color: #444; text-align: center; flex: 1; cursor: pointer; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item span { display: block; font-size: 8px; font-weight: 900; margin-top: 4px; }
+
+        .side-menu { position: fixed; right: -100%; top: 0; width: 280px; height: 100%; background: #050505; border-left: 1px solid var(--gold); z-index: 5000; transition: 0.4s; padding: 20px; }
+        .side-menu.open { right: 0; }
+        .menu-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #111; color: #ccc; cursor: pointer; font-size: 13px; }
+        .menu-item i { margin-right: 15px; color: var(--gold); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4500; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="ui.toggleMenu()"></div>
+
+    <div class="side-menu" id="side-menu">
+        <h3 style="color:var(--gold); margin-bottom: 20px;">V-PRO SERVICES</h3>
+        <div id="god-opt" class="menu-item hidden" onclick="core.switch('god')"><i class="fas fa-crown"></i> Master Control</div>
+        <div id="mgr-opt" class="menu-item hidden" onclick="core.switch('god')"><i class="fas fa-tasks"></i> Manager Panel</div>
         <div class="menu-item"><i class="fas fa-magic"></i> Smart Select</div>
         <div class="menu-item"><i class="fas fa-gift"></i> Lucky Draw</div>
         <div class="menu-item" onclick="authMod.logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
     </div>
 
-    <div id="screen-auth" class="app-page" style="text-align: center; padding-top: 100px;">
+    <div id="screen-auth" class="app-page hidden" style="text-align:center; padding-top:100px;">
         <div class="card">
-            <h2 style="color:var(--gold); margin-bottom: 20px;">V-PRO GLOBAL</h2>
-            <p style="font-size: 12px; margin-bottom: 20px;">Please Login to Access Services</p>
-            <button class="btn-gold" onclick="authMod.google()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:15px; vertical-align:middle; margin-right:10px;">
-                SIGN IN WITH GOOGLE
+            <h2 style="color:var(--gold)">V-PRO GLOBAL</h2>
+            <button class="btn-gold" style="margin-top:20px; background:#fff;" onclick="authMod.google()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:15px; margin-right:10px;"> SIGN IN
             </button>
         </div>
     </div>
 
     <div id="app-main" class="hidden">
-        </div>
+        
+        <section id="page-home" class="app-page">
+            <div class="card" style="text-align:center;">
+                <h4 style="color:var(--gold)">V-PRO MARKET</h4>
+                <p id="timer-status" style="font-size:10px; color:#555;">Active Time: 0s</p>
+            </div>
+            <div class="card"><h4>V-Dresify E-commerce</h4><p style="font-size:10px;">Smart Fashion Selected</p></div>
+        </section>
+
+        <section id="page-orders" class="app-page hidden">
+            <div class="card"><h3>Your Orders</h3><p>Track your smart fashion here.</p></div>
+        </section>
+
+        <section id="page-wallet" class="app-page hidden">
+            <div class="card" style="text-align:center;">
+                <h2 id="w-coins" style="color:var(--gold)">0</h2>
+                <p>V-COINS BALANCE</p>
+            </div>
+        </section>
+
+        <section id="page-me" class="app-page hidden" style="text-align:center;">
+            <div style="display:flex; justify-content:flex-end; padding:0 20px;">
+                <i class="fas fa-ellipsis-v" style="font-size:20px; color:var(--gold);" onclick="ui.toggleMenu()"></i>
+            </div>
+            <img id="u-img" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">
+            <h2 id="u-name">---</h2>
+            <p id="u-vpg-id" style="color:var(--gold); font-size:11px;">ID: ---</p>
+
+            <div class="card">
+                <h4 style="color:var(--gold); text-align:left;">📅 DAILY REWARDS</h4>
+                <div class="signin-grid" id="signin-grid"></div>
+                <button id="claim-btn" class="btn-gold" style="margin-top:15px; display:none;" onclick="rewardMod.claim()">CLAIM REWARD</button>
+            </div>
+            <button class="btn-gold" style="width:140px; background:#222; color:#fff;" onclick="core.switch('edit')">EDIT PROFILE</button>
+        </section>
+
+        <section id="page-edit" class="app-page hidden" style="padding:20px;">
+            <div class="card">
+                <h3>Update Info</h3>
+                <input type="text" id="edit-name" class="god-input" placeholder="Name">
+                <button class="btn-gold" onclick="profileMod.save()">SAVE CHANGES</button>
+            </div>
+        </section>
+
+        <section id="page-god" class="app-page hidden" style="padding:15px;">
+            <h2 style="color:var(--gold); text-align:center;">🔱 MASTER PANEL</h2>
+            <div class="card">
+                <input type="text" id="target-vpg" class="god-input" placeholder="User VPG-ID">
+                <button class="btn-gold" onclick="godMod.ban(true)">BAN USER</button>
+                <button class="btn-gold" style="margin-top:5px; background:#222; color:#fff;" onclick="godMod.ban(false)">UNBAN USER</button>
+            </div>
+        </section>
+    </div>
+
+    <nav id="nav-bar" class="bottom-nav hidden">
+        <div class="nav-item active" onclick="core.switch('home', this)"><i class="fas fa-home"></i><span>HOME</span></div>
+        <div class="nav-item" onclick="core.switch('orders', this)"><i class="fas fa-box"></i><span>ORDERS</span></div>
+        <div class="nav-item" onclick="core.switch('wallet', this)"><i class="fas fa-wallet"></i><span>WALLET</span></div>
+        <div class="nav-item" onclick="core.switch('me', this)"><i class="fas fa-user-circle"></i><span>ME</span></div>
+    </nav>
 
     <script>
-        // ... Firebase Config ...
+        // FIREBASE INITIALIZATION
+        const firebaseConfig = { 
+            apiKey: "AIzaSyB4Wk-096y9SAhtygKGLoJ1EHZR0WWSUOc",
+            authDomain: "v-pro-global.firebaseapp.com",
+            projectId: "v-pro-global",
+            storageBucket: "v-pro-global.firebasestorage.app",
+            messagingSenderId: "741845554827",
+            appId: "1:741845554827:web:04a75d2207df326d72a68e"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(), db = firebase.firestore();
+
+        let userData = {}, activeSeconds = 0;
+
+        const ui = {
+            toggleMenu: () => {
+                document.getElementById('side-menu').classList.toggle('open');
+                const overlay = document.getElementById('overlay');
+                overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
+            }
+        };
 
         const core = {
             init: (data) => {
                 userData = data;
-                // UI update logic...
+                document.getElementById('u-name').innerText = data.name;
+                document.getElementById('u-vpg-id').innerText = "ID: " + data.uniqueId;
+                document.getElementById('u-img').src = data.profilePic || auth.currentUser.photoURL;
+                document.getElementById('w-coins').innerText = data.vCoins || 0;
                 
-                // --- ROLE CHECK ---
+                // FOUNDER AURA LOGIC
                 if(auth.currentUser.email === "dreamchat26@gmail.com") {
+                    document.getElementById('u-img').classList.add('founder-aura');
                     document.getElementById('god-opt').classList.remove('hidden');
                 }
-                if(data.role === "Manager") {
-                    document.getElementById('mgr-opt').classList.remove('hidden');
-                }
+                if(data.role === "Manager") document.getElementById('mgr-opt').classList.remove('hidden');
 
-                document.getElementById('screen-auth').classList.add('hidden');
-                document.getElementById('app-main').classList.remove('hidden');
-                document.getElementById('nav-bar').classList.remove('hidden');
+                rewardMod.startTimer();
+                rewardMod.render();
+            },
+            switch: (id, el) => {
+                document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+                document.getElementById('page-' + id).classList.remove('hidden');
+                if(el) {
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    el.classList.add('active');
+                }
+                if(document.getElementById('side-menu').classList.contains('open')) ui.toggleMenu();
+            }
+        };
+
+        const rewardMod = {
+            startTimer: () => {
+                setInterval(() => {
+                    if (!document.hidden && auth.currentUser) {
+                        activeSeconds++;
+                        document.getElementById('timer-status').innerText = `Active Time: ${activeSeconds}s`;
+                        if(activeSeconds % 600 === 0) db.collection('users').doc(auth.currentUser.uid).update({ vCoins: firebase.firestore.FieldValue.increment(70) });
+                    }
+                }, 1000);
+            },
+            render: () => {
+                const grid = document.getElementById('signin-grid'); grid.innerHTML = "";
+                for(let i=1; i<=8; i++) {
+                    const box = document.createElement('div');
+                    box.className = `day-box ${userData.streak >= i ? 'claimed' : ''}`;
+                    box.innerHTML = `Day ${i}`;
+                    grid.appendChild(box);
+                }
+                if(userData.lastClaimed !== new Date().toDateString()) document.getElementById('claim-btn').style.display='block';
+            },
+            claim: async () => {
+                await db.collection('users').doc(auth.currentUser.uid).update({ vCoins: firebase.firestore.FieldValue.increment(50), streak: (userData.streak||0)+1, lastClaimed: new Date().toDateString() });
+                location.reload();
+            }
+        };
+
+        const godMod = {
+            ban: async (status) => {
+                const vid = document.getElementById('target-vpg').value;
+                const snap = await db.collection('users').where('uniqueId', '==', vid).get();
+                if(!snap.empty) { await snap.docs[0].ref.update({ isBanned: status }); alert("Done!"); }
+            }
+        };
+
+        const profileMod = {
+            save: async () => {
+                await db.collection('users').doc(auth.currentUser.uid).update({ name: document.getElementById('edit-name').value });
+                location.reload();
             }
         };
 
         const authMod = {
-            google: () => {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                auth.signInWithPopup(provider).catch(err => alert("Popup Blocked! Please allow popups."));
-            },
+            google: () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()),
             logout: () => auth.signOut().then(() => location.reload())
         };
 
@@ -62,23 +232,20 @@
             if(user) {
                 const doc = await db.collection('users').doc(user.uid).get();
                 if(doc.exists) {
+                    if(doc.data().isBanned) { document.body.innerHTML = "BANNED"; return; }
+                    document.getElementById('screen-auth').classList.add('hidden');
+                    document.getElementById('app-main').classList.remove('hidden');
+                    document.getElementById('nav-bar').classList.remove('hidden');
                     core.init(doc.data());
                 } else {
                     const vid = "VPG-" + Math.floor(1000 + Math.random()*9000);
-                    await db.collection('users').doc(user.uid).set({ 
-                        name: user.displayName, 
-                        role: "User", // Default role
-                        uniqueId: vid, 
-                        vCoins: 100,
-                        streak: 0 
-                    });
+                    await db.collection('users').doc(user.uid).set({ name: user.displayName, uniqueId: vid, vCoins: 100, streak: 0, lastClaimed: "", role: "User", isBanned: false });
                     location.reload();
                 }
             } else {
                 document.getElementById('screen-auth').classList.remove('hidden');
-                document.getElementById('app-main').classList.add('hidden');
-                document.getElementById('nav-bar').classList.add('hidden');
             }
         });
     </script>
-    
+</body>
+</html>
